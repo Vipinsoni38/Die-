@@ -5,23 +5,17 @@ using UnityEngine.SceneManagement;
 
 public class MainScene : MonoBehaviour
 {
-    public GameObject enemy, particles, GameoverPannel, PauseMenu;
-    GameObject player;
-    float time = 0;
-    public GameObject Ground, Top, Lscreen, Rscreen;
+    public GameObject enemy, particles, GameoverPannel, PauseMenu, BaseGround;
+    GameObject player, temp;
+    float time = 0;    
     bool Paused = false, gameOver = false;
+    int x = 0;
     // Start is called before the first frame update
     void Start()
     {        
         Physics2D.gravity = new Vector2(0, -40);
         Application.targetFrameRate = 60;
         player = GameObject.FindGameObjectWithTag("Player");
-        /*Top.transform.position = new Vector2(0, Screen.height/2);
-        Lscreen.transform.position = new Vector2(-1 * Screen.width / 2, Screen.height/2);
-        Rscreen.transform.position = new Vector2(Screen.width/2, Screen.height/2);
-        Ground.transform.position = new Vector2(0, -1 * Screen.height / 2);*/
-        //print(Camera.main.WorldToScreenPoint(new Vector3(Screen.width / 2, Screen.height / 2, 0)));
-        print(Screen.width + ":" + Screen.height);
         GameoverPannel.SetActive(false);
         PauseMenu.SetActive(false);
         Time.timeScale = 1;
@@ -29,14 +23,25 @@ public class MainScene : MonoBehaviour
 
     private void Update()
     {
-        /*if(time > 4)
+        
+        
+        if (Input.GetKeyDown(KeyCode.Escape) && !gameOver)
         {
-            RandomInstantiate();
-            time = 0;
+            if (Paused)
+            {
+                Resume();
+                Paused = false;
+            }
+            else
+            {
+                Pause();
+                Paused = true;
+            }
         }
-        time += Time.deltaTime;
-        */
-
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if(gameOver) Restart();
+        }
 
 
         float targetaspect = 16.0f / 9.0f;
@@ -67,22 +72,13 @@ public class MainScene : MonoBehaviour
 
             camera.rect = rect;
         }
-        if (Input.GetKeyDown(KeyCode.Escape) && !gameOver)
+
+        if (!player) return;
+        if (player.transform.position.y > 6 * x)
         {
-            if (Paused)
-            {
-                Resume();
-                Paused = false;
-            }
-            else
-            {
-                Pause();
-                Paused = true;
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && gameOver)
-        {
-            Restart();
+            x++;
+            temp = Instantiate(BaseGround);
+            temp.transform.position = new Vector2(Random.Range(-8,8), 6 * x);
         }
     }
     void RandomInstantiate()

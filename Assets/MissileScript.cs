@@ -22,9 +22,12 @@ public class MissileScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!player)
+        {
+            return;
+        }
         vel = (Vector2)(player.position - transform.position);
         vel = vel.normalized;
-        print(vel);
         if(vel.x < 0)
         {
             this.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 57.2957f * Mathf.Atan(vel.y / vel.x)));

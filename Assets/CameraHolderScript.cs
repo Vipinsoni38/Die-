@@ -6,6 +6,7 @@ public class CameraHolderScript : MonoBehaviour
 {
     Transform player;
     Vector3 defaultPos;
+    float currentMax = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,9 +15,18 @@ public class CameraHolderScript : MonoBehaviour
     }
 
     // Update is called once per frame
-    /*void Update()
+    void Update()
     {
-        defaultPos.x = player.position.x;
-        transform.position = defaultPos;
-    }*/
+        if(!player)
+        {
+            return;
+        }
+        if(player.position.y > currentMax)
+        {
+            defaultPos.y = player.position.y;
+            transform.position = defaultPos;
+            currentMax = player.position.y;
+        }
+
+    }
 }

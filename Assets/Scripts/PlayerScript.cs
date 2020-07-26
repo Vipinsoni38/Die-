@@ -7,7 +7,8 @@ public class PlayerScript : MonoBehaviour
     Rigidbody2D player;
     Vector2 CurrPos;
     MainScene mainScene;
-    float vel = 5;
+    bool inJump = false;
+    float vel = 12;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +22,7 @@ public class PlayerScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             jump();
+            this.gameObject.layer = LayerMask.NameToLayer("ExtraLayer");
         } else if (Input.GetKey(KeyCode.RightArrow))
         {
             CurrPos = (Vector2)transform.position;
@@ -30,11 +32,19 @@ public class PlayerScript : MonoBehaviour
             CurrPos = (Vector2)transform.position;
             Left();
         }
+        if (inJump)
+        {
+            if (player.velocity.y <= 0)
+            {
+                this.gameObject.layer = LayerMask.NameToLayer("Default");
+                inJump = false;
+            }
+        }
     }
     void jump()
     {
-        player.velocity = (new Vector2(0, 14));
-
+        player.velocity = (new Vector2(0, 20));
+        inJump = true;
     }
     void Right()
     {
