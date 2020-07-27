@@ -5,27 +5,43 @@ using UnityEngine.SceneManagement;
 
 public class MainScene : MonoBehaviour
 {
-    public GameObject enemy, particles, GameoverPannel, PauseMenu, BaseGround;
+    public GameObject enemy, particles, GameoverPannel, PauseMenu, BaseGround, BlackHole, WonMenu;
+    public GameObject MainCloud;
+    SpriteRenderer playerSprite;
+    public Transform water;
     GameObject player, temp;
-    float time = 0;    
-    bool Paused = false, gameOver = false;
-    int x = 0;
+    Color playerSpriteColor;
+    float time = 0;
+    bool Paused = false, gameOver = false, isWon = false, StoryMode = true;
+    int x = -2;
+    Vector3 scaleWater;
     // Start is called before the first frame update
     void Start()
-    {        
-        Physics2D.gravity = new Vector2(0, -40);
+    {
+        //PlayerPrefs.SetInt("justCurrentLevel", -1);
+        Physics2D.gravity = new Vector2(0, 0);
         Application.targetFrameRate = 60;
         player = GameObject.FindGameObjectWithTag("Player");
         GameoverPannel.SetActive(false);
         PauseMenu.SetActive(false);
+        WonMenu.SetActive(false);
         Time.timeScale = 1;
+        playerSprite = player.GetComponent<SpriteRenderer>();
+        playerSpriteColor = playerSprite.color;
+        playerSpriteColor.a = 0;
+        playerSprite.color = playerSpriteColor;
+        scaleWater = water.transform.localScale;        
     }
 
     private void Update()
     {
-        
-        
-        if (Input.GetKeyDown(KeyCode.Escape) && !gameOver)
+        CorrectRatioForGame();
+        if (StoryMode)
+        {
+            Story();
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Escape) && !gameOver && !isWon)
         {
             if (Paused)
             {
@@ -40,10 +56,12 @@ public class MainScene : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if(gameOver) Restart();
+            if (gameOver) Restart();
         }
+    }
 
-
+    void CorrectRatioForGame()
+    {
         float targetaspect = 16.0f / 9.0f;
         float windowaspect = (float)Screen.width / (float)Screen.height;
         float scaleheight = windowaspect / targetaspect;
@@ -72,15 +90,8 @@ public class MainScene : MonoBehaviour
 
             camera.rect = rect;
         }
-
-        if (!player) return;
-        if (player.transform.position.y > 6 * x)
-        {
-            x++;
-            temp = Instantiate(BaseGround);
-            temp.transform.position = new Vector2(Random.Range(-8,8), 6 * x);
-        }
     }
+
     void RandomInstantiate()
     {
         GameObject g = Instantiate(enemy);
@@ -110,5 +121,64 @@ public class MainScene : MonoBehaviour
     {
         Time.timeScale = 1;
         PauseMenu.SetActive(false);
+    }
+    void Story()
+    {
+        scaleWater.y -= 1f;
+        playerSpriteColor.a += 0.005f;
+        if (scaleWater.y <= 0 || Input.GetKeyDown(KeyCode.Space))
+        {
+            StoryMode = false;
+            water.gameObject.SetActive(false);
+            Time.timeScale = 1;
+            playerSpriteColor.a = 1;
+            playerSprite.color = playerSpriteColor;
+            player.GetComponent<PlayerScript>().MakePlayerActive();
+            Physics2D.gravity = new Vector2(0, -40);
+            LoadLevel(1);
+            return;
+        }
+        playerSprite.color = playerSpriteColor;
+        water.localScale = scaleWater;
+    }
+    void LoadLevel(int level)
+    {
+        TextAsset theList = Resources.Load("levels/level" + level) as TextAsset;
+        print("levels/level" + level);
+        string[] lines = theList.text.Split('\n');
+        string[] words;
+        GameObject g;
+        foreach (string line in lines)
+        {
+            words = line.Split(' ');
+            g = InstantiateGO(words[0]);
+            g.transform.position = new Vector2(float.Parse(words[1]), float.Parse(words[2]));
+            if (words.Length < 4)
+            {
+                continue;
+            }
+            g.transform.rotation = Quaternion.Euler(new Vector3(0, 0, float.Parse(words[3])) );
+        }
+        FindObjectOfType<CameraHolderScript>().calculateMaxHeight();
+    }
+    GameObject InstantiateGO(string v)
+    {
+        switch (v)
+        {
+            case "base": return Instantiate(BaseGround); 
+            case "BlackHole": return Instantiate(BlackHole);
+            case "MainCloud": return Instantiate(MainCloud);
+        }
+        return null;
+    }
+    public void Won()
+    {
+        isWon = true;
+        Destroy(player);
+        WonMenu.SetActive(true);
+    }
+    public void nextLevel()
+    {
+
     }
 }

@@ -4,14 +4,9 @@ using UnityEngine;
 
 public class CanvasScript : MonoBehaviour
 {
-    int score = 0, health = 50;
+    int score = 0;
     public TMPro.TextMeshProUGUI text;
     public GameObject healthBar;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     public void AddScore()
     {
@@ -19,8 +14,4 @@ public class CanvasScript : MonoBehaviour
         text.SetText("" + score);
     }
 
-    void UpdateScore()
-    {
-        healthBar.GetComponent<RectTransform>().right = new Vector3(0,0,0);
-    }
 }

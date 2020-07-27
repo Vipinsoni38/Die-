@@ -6,7 +6,7 @@ public class CameraHolderScript : MonoBehaviour
 {
     Transform player;
     Vector3 defaultPos;
-    float currentMax = 0;
+    float currentMax = 3, maxHeight = 200;    
     // Start is called before the first frame update
     void Start()
     {
@@ -21,12 +21,17 @@ public class CameraHolderScript : MonoBehaviour
         {
             return;
         }
-        if(player.position.y > currentMax)
+        if(player.position.y > currentMax && player.position.y<maxHeight)
         {
-            defaultPos.y = player.position.y;
+            defaultPos.y = player.position.y - 3;
             transform.position = defaultPos;
             currentMax = player.position.y;
         }
 
+    }
+    public void calculateMaxHeight()
+    {
+        GameObject g = GameObject.FindGameObjectWithTag("Win");
+        maxHeight = g.transform.position.y-2;
     }
 }
