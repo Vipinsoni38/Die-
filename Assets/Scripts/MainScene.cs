@@ -6,19 +6,27 @@ using UnityEngine.SceneManagement;
 public class MainScene : MonoBehaviour
 {
     public GameObject enemy, particles, GameoverPannel, PauseMenu, BaseGround, BlackHole, WonMenu;
-    public GameObject MainCloud;
+    public GameObject MainCloud, BadGround, Missile, DoubleJump, Shield, JumpCloud, DynamicBase, PauseButton;
     SpriteRenderer playerSprite;
     public Transform water;
     GameObject player, temp;
     Color playerSpriteColor;
     float time = 0;
+    public AudioSource Audio;
+    public static AudioClip die, powerup, jump, win;
     bool Paused = false, gameOver = false, isWon = false, StoryMode = true;
     int x = -2;
     Vector3 scaleWater;
+
     // Start is called before the first frame update
     void Start()
     {
+        die = Resources.Load<AudioClip>("music/die");
+        powerup = Resources.Load<AudioClip>("music/power_up");
+        jump = Resources.Load<AudioClip>("music/jump");
+        win = Resources.Load<AudioClip>("music/win");
         //PlayerPrefs.SetInt("justCurrentLevel", -1);
+        PauseButton.SetActive(false);
         Physics2D.gravity = new Vector2(0, 0);
         Application.targetFrameRate = 60;
         player = GameObject.FindGameObjectWithTag("Player");
@@ -30,7 +38,8 @@ public class MainScene : MonoBehaviour
         playerSpriteColor = playerSprite.color;
         playerSpriteColor.a = 0;
         playerSprite.color = playerSpriteColor;
-        scaleWater = water.transform.localScale;        
+        scaleWater = water.transform.localScale;
+        //Audio = FindObjectOfType<AudioSource>();
     }
 
     private void Update()
@@ -110,7 +119,7 @@ public class MainScene : MonoBehaviour
     }
     public void Restart()
     {
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(1);
     }
     public void Pause()
     {
@@ -143,6 +152,7 @@ public class MainScene : MonoBehaviour
     }
     void LoadLevel(int level)
     {
+        PauseButton.SetActive(true);
         TextAsset theList = Resources.Load("levels/level" + level) as TextAsset;
         print("levels/level" + level);
         string[] lines = theList.text.Split('\n');
@@ -168,6 +178,13 @@ public class MainScene : MonoBehaviour
             case "base": return Instantiate(BaseGround); 
             case "BlackHole": return Instantiate(BlackHole);
             case "MainCloud": return Instantiate(MainCloud);
+            case "BadGround": return Instantiate(BadGround);
+            case "Missile": return Instantiate(Missile);
+            case "DoubleJump": return Instantiate(DoubleJump);
+            case "Shield": return Instantiate(Shield); 
+            case "JumpCloud": return Instantiate(JumpCloud);
+            case "DynamicBase": return Instantiate(DynamicBase);
+                
         }
         return null;
     }
@@ -180,5 +197,22 @@ public class MainScene : MonoBehaviour
     public void nextLevel()
     {
 
+    }
+
+
+    public void Menu()
+    {
+        SceneManager.LoadScene(0);     
+    }
+    public void playSound(string s)
+    {
+        switch (s)
+        {
+            case "die": Audio.PlayOneShot(die, 1); break;
+            case "jump": Audio.PlayOneShot(jump, 1); break;
+            case "powerup": Audio.PlayOneShot(powerup, 1); break;
+            case "win": Audio.PlayOneShot(win, 1); break;
+            default: break;
+        }
     }
 }

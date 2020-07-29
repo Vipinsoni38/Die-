@@ -7,7 +7,8 @@ public class PlayerScript : MonoBehaviour
     Rigidbody2D player;
     Vector2 CurrPos;
     MainScene mainScene;
-    bool inJump = false, playerActive = false, canJump = true;
+    bool inJump = false, playerActive = false, canJump = true, isShield = false;
+    GameObject shield;
     int MaxJump = 1, currJump = 0;
     float vel = 7;
     // Start is called before the first frame update
@@ -15,6 +16,7 @@ public class PlayerScript : MonoBehaviour
     {
         player = GetComponent<Rigidbody2D>();
         mainScene = FindObjectOfType<MainScene>();
+        shield = transform.Find("Shield").gameObject;
     }
 
     // Update is called once per frame
@@ -51,6 +53,7 @@ public class PlayerScript : MonoBehaviour
         {
             return;
         }
+        mainScene.playSound("jump");
         this.gameObject.layer = LayerMask.NameToLayer("ExtraLayer");
         player.velocity = (new Vector2(0, 18));        
         inJump = true;
@@ -70,7 +73,10 @@ public class PlayerScript : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        currJump = 0;
+        if (!collision.gameObject.tag.Equals("Enviro"))
+        {
+            currJump = 0;
+        }            
         if (collision.gameObject.tag.Equals("death"))
         {
             GameOver();
@@ -91,19 +97,36 @@ public class PlayerScript : MonoBehaviour
     {       
         if (other.gameObject.tag.Equals("DoubleJump"))
         {
-            if(MaxJump < 2)
+            mainScene.playSound("powerup");
+            if (MaxJump < 2)
             {
                 MaxJump = 2;
             }
             Destroy(other.gameObject);
         }
+        if (other.gameObject.tag.Equals("Shield"))
+        {
+            mainScene.playSound("powerup");
+            isShield = true;
+            shield.SetActive(true);
+            Destroy(other.gameObject);
+        }
         if (other.gameObject.tag.Equals("Win"))
         {
+            other.gameObject.transform.Find("rain").gameObject.SetActive(true);
+            mainScene.playSound("win");
             mainScene.Won();
         }        
     }
-    void GameOver()
+    public void GameOver()
     {
+        if (isShield)
+        {
+            isShield = false;
+            shield.SetActive(false);
+            return;
+        }
+        mainScene.playSound("die");
         mainScene.GameOver();
     }
     public void MakePlayerActive()
